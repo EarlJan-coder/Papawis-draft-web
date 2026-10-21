@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: papawis-dev-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: papawis
+      POSTGRES_PASSWORD: papawis
+      POSTGRES_DB: papawis
+    ports:
+      # 5433 avoids clashing with a native PostgreSQL service on the host.
+      - "5433:5432"
+    volumes:
+      - papawis_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U papawis -d papawis"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  papawis_pgdata:
