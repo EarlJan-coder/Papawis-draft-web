@@ -1,16 +1,26 @@
 import { requireRole } from "@/lib/auth/guards";
-import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import {
+  listApprovedProfiles,
+  listPendingProfiles,
+} from "@/features/approvals/approval-service";
+import {
+  ApprovedPlayerRow,
+  PendingProfileCard,
+} from "@/components/organizer/queue";
 import { Badge } from "@/components/ui/badge";
 import { Suspense } from "react";
 
 /**
- * Organizer control panel.
- * Phase 3 wires the pending-approval queue, Phase 4 the team/captain and
- * draft lifecycle controls. Access is restricted to the organizer role and
- * re-verified on every request.
+ * Organizer console: pending-profile review queue with approve/reject and
+ * the approved roster with draft-eligibility toggles. Access is restricted
+ * to the organizer role and re-verified on every request.
  */
 async function OrganizerContent() {
   const user = await requireRole(["organizer"]);
+  const [pending, approved] = await Promise.all([
+    listPendingProfiles(),
+    listApprovedProfiles(),
+  ]);
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
@@ -18,41 +28,73 @@ async function OrganizerContent() {
         <div>
           <h1 className="text-2xl font-semibold">Organizer console</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage players, teams, and the draft.
+            Review players, then manage teams and the draft.
           </p>
         </div>
         <Badge tone="brand">Signed in as {user.email}</Badge>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardTitle className="text-base">Player approvals</CardTitle>
-          <CardDescription>
-            Review registered players and mark draft eligibility.
-          </CardDescription>
-          <div className="mt-3">
-            <Badge tone="warning">Coming in phase 3</Badge>
-          </div>
-        </Card>
-        <Card>
-          <CardTitle className="text-base">Teams &amp; captains</CardTitle>
-          <CardDescription>
+      <section className="mt-8">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold">Pending approvals</h2>
+          <Badge tone={pending.length > 0 ? "warning" : "neutral"}>
+            {pending.length}
+          </Badge>
+        </div>
+        <div className="mt-4 space-y-4">
+          {pending.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No profiles waiting for review.
+            </p>
+          ) : (
+            pending.map((entry) => (
+              <PendingProfileCard key={entry.id} entry={entry} />
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="mt-10">
+        <div className="flex items-center gap-2">
+          <h2 className="text-lg font-semibold">Approved players</h2>
+          <Badge tone="neutral">{approved.length}</Badge>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Draft eligibility controls who captains can pick.
+        </p>
+        <div className="mt-4 space-y-3">
+          {approved.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No approved players yet.
+            </p>
+          ) : (
+            approved.map((entry) => (
+              <ApprovedPlayerRow key={entry.id} entry={entry} />
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="mt-10 grid gap-4 sm:grid-cols-2">
+        <div className="rounded-lg border border-border bg-card p-4">
+          <h3 className="font-medium">Teams &amp; captains</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
             Configure the four teams, assign captains, and set draft order.
-          </CardDescription>
+          </p>
           <div className="mt-3">
             <Badge tone="warning">Coming in phase 4</Badge>
           </div>
-        </Card>
-        <Card>
-          <CardTitle className="text-base">Draft controls</CardTitle>
-          <CardDescription>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-4">
+          <h3 className="font-medium">Draft controls</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
             Start, pause, resume, undo, and publish the draft.
-          </CardDescription>
+          </p>
           <div className="mt-3">
             <Badge tone="warning">Coming in phase 5</Badge>
           </div>
-        </Card>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -1,15 +1,27 @@
 import { requireUser } from "@/lib/auth/guards";
+import { getProfileForUser } from "@/features/profiles/profile-service";
+import { ProfileForm } from "@/components/profile-form";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Suspense } from "react";
 
 /**
- * Player dashboard. Phase 3 adds profile completion/approval widgets;
- * this establishes the authenticated shell and shows account state.
- * Session access is inside <Suspense> (required by cache components).
+ * Player dashboard: account state, profile status with completion, and the
+ * profile form (create or edit). Session and profile access sit inside
+ * <Suspense> (required by cache components).
  */
+
+const STATUS_BADGE = {
+  pending: { tone: "warning", label: "Awaiting review" },
+  approved: { tone: "success", label: "Approved" },
+  rejected: { tone: "danger", label: "Rejected" },
+} as const;
+
 async function DashboardContent() {
   const user = await requireUser();
+  const view = await getProfileForUser(user.id);
+  const profile = view.profile;
+  const badge = profile ? STATUS_BADGE[profile.profileStatus] : null;
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6">
@@ -33,14 +45,72 @@ async function DashboardContent() {
         <Card>
           <CardTitle className="text-base">Player profile</CardTitle>
           <CardDescription>
-            Profile editing becomes available once your account is linked to a
-            player profile.
+            {profile
+              ? "Your profile as the organizers see it."
+              : "Create your profile to be reviewed for the draft."}
           </CardDescription>
-          <div className="mt-3">
-            <Badge tone="warning">Profile setup coming in the next phase</Badge>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {badge ? (
+              <Badge tone={badge.tone}>{badge.label}</Badge>
+            ) : (
+              <Badge tone="warning">Not submitted</Badge>
+            )}
+            {view.ageYears != null && (
+              <Badge tone="neutral">Age: {view.ageYears}</Badge>
+            )}
+            <Badge tone="neutral">Completion: {view.completion}%</Badge>
+          </div>
+          {profile?.statusReason && (
+            <p className="mt-2 text-sm text-destructive">
+              Reason: {profile.statusReason}
+            </p>
+          )}
+          {profile?.profileStatus === "approved" && (
+            <p className="mt-2 text-sm text-green-800">
+              Your profile is locked because it was approved.
+            </p>
+          )}
+          <div
+            className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted"
+            role="progressbar"
+            aria-valuenow={view.completion}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div
+              className="h-full rounded-full bg-brand-600 transition-all"
+              style={{ width: `${view.completion}%` }}
+            />
           </div>
         </Card>
       </div>
+
+      <Card className="mt-6">
+        <CardTitle className="text-base">
+          {profile ? "Edit profile" : "Create your profile"}
+        </CardTitle>
+        <CardDescription>
+          Only the display name and at least one position are required. The
+          more you fill in, the easier the organizers can place you.
+        </CardDescription>
+        <div className="mt-4">
+          <ProfileForm
+            initial={
+              profile
+                ? {
+                    displayName: profile.displayName,
+                    dateOfBirth: profile.dateOfBirth,
+                    heightCm: profile.heightCm,
+                    positions: profile.positions,
+                    skillLevel: profile.skillLevel,
+                    experience: profile.experience,
+                    bio: profile.bio,
+                  }
+                : null
+            }
+          />
+        </div>
+      </Card>
     </div>
   );
 }
@@ -50,7 +120,7 @@ export default function DashboardPage() {
     <Suspense
       fallback={
         <div className="mx-auto max-w-4xl space-y-4 px-4 py-10 sm:px-6">
-          <div className="h-8 w-64 animate-pulse rounded bg-muted" />
+          <div className="h-8 w-64 animate-pulse rounded" />
           <div className="h-40 animate-pulse rounded-lg border border-border bg-card" />
         </div>
       }
