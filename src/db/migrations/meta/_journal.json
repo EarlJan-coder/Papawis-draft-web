@@ -8,6 +8,27 @@
       "when": 1792564732653,
       "tag": "0000_serious_shatterstar",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792566700648,
+      "tag": "0001_conscious_alex_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792567515698,
+      "tag": "0002_noisy_photon",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792569799792,
+      "tag": "0003_whole_black_tarantula",
+      "breakpoints": true
     }
   ]
 }
