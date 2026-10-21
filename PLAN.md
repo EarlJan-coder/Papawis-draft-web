@@ -31,11 +31,11 @@ Basketball league registration + 4-team snake draft MVP. One league, three roles
 
 ## Phase 3 — Player registration & organizer approval
 
-- [ ] Profile form (display name, DOB, height cm, positions PG/SG/SF/PF/C, skill, experience, bio)
-- [ ] Server-side Zod validation; age computed from DOB; no full DOB/email exposure
-- [ ] Profile completion + status display on player dashboard
-- [ ] Organizer review queue: approve/reject with reason, eligibility toggle
-- [ ] Tests: profile validation, approval rules, self-approval prevention
+- [x] Profile form (display name, DOB, height cm, positions PG/SG/SF/PF/C, skill, experience, bio)
+- [x] Server-side Zod validation; age computed from DOB; no full DOB/email exposure
+- [x] Profile completion + status display on player dashboard
+- [x] Organizer review queue: approve/reject with reason, eligibility toggle
+- [x] Tests: profile validation, approval rules, self-approval prevention
 
 ## Phase 4 — Teams & draft setup
 
