@@ -12,9 +12,11 @@
     "test:watch": "vitest",
     "db:migrate": "node --env-file-if-exists=.env --import tsx src/db/migrate.ts",
     "db:studio": "node --env-file-if-exists=.env node_modules/drizzle-kit/bin.cjs studio",
+    "provision:organizer": "node --env-file-if-exists=.env --import tsx scripts/provision-organizer.ts",
     "db:generate": "node --env-file-if-exists=.env node_modules/drizzle-kit/bin.cjs generate"
   },
   "dependencies": {
+    "@better-auth/drizzle-adapter": "^1.7.12",
     "better-auth": "^1.7.12",
     "drizzle-orm": "^0.45.4",
     "next": "16.4.2",
