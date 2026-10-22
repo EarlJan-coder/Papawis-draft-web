@@ -22,7 +22,7 @@ npm run dev                 # http://localhost:3000
 |---|---|
 | Local Docker | `postgres://papawis:papawis@localhost:5433/papawis` (`docker compose up -d`) |
 | Neon (dev/prod) | `postgres://<user>:<password>@<endpoint>.neon.tech/neondb?sslmode=require` |
-| Tests | `TEST_DATABASE_URL` → disposable Postgres (falls back to `DATABASE_URL`) |
+| Tests | `TEST_DATABASE_URL` → disposable Postgres (falls back to a sibling DB on the `DATABASE_URL` server) |
 
 > The Docker container publishes host port **5433** to avoid clashing with any
 > native PostgreSQL service already on 5432.

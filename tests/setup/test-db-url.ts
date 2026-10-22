@@ -14,17 +14,21 @@ export function loadDotEnv(): void {
 }
 
 /**
- * A sibling database on the DATABASE_URL server (same host/port, different
- * database name), so a suite can never touch development data.
+ * A sibling database on the test server (same host/port, different
+ * database name), so a suite can never touch development or production
+ * data. The base server is TEST_DATABASE_URL when set — keeping suites on
+ * local Docker even when DATABASE_URL points at a cloud database (Neon) —
+ * falling back to DATABASE_URL otherwise (CI).
  */
 export function siblingDatabaseUrl(dbName: string): string {
-  const dev = process.env.DATABASE_URL?.trim();
-  if (!dev) {
+  const base =
+    process.env.TEST_DATABASE_URL?.trim() || process.env.DATABASE_URL?.trim();
+  if (!base) {
     throw new Error(
-      "DATABASE_URL is not set. Copy .env.example to .env (or export DATABASE_URL) before running tests.",
+      "Neither TEST_DATABASE_URL nor DATABASE_URL is set. Copy .env.example to .env (or export DATABASE_URL) before running tests.",
     );
   }
-  const url = new URL(dev);
+  const url = new URL(base);
   url.pathname = `/${dbName}`;
   return url.toString();
 }
