@@ -62,10 +62,10 @@ Basketball league registration + 4-team snake draft MVP. One league, three roles
 
 ## Phase 7 — Audit history & publication
 
-- [ ] Audit log recording across admin + draft actions
-- [ ] Organizer audit history UI
-- [ ] Draft completion validation + roster publication (server-gated)
-- [ ] Public homepage: league name (configurable), published rosters only; no private data leak
+- [x] Audit log recording across admin + draft actions
+- [x] Organizer audit history UI
+- [x] Draft completion validation + roster publication (server-gated)
+- [x] Public homepage: league name (configurable), published rosters only; no private data leak
 
 ## Phase 8 — QA & deployment readiness
 

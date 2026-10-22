@@ -48,6 +48,7 @@ async function DraftContent() {
         status: draft.status,
         totalRounds: draft.totalRounds,
         currentPickNumber: draft.currentPickNumber,
+        publishedAt: draft.publishedAt ? draft.publishedAt.toISOString() : null,
       }}
       turn={turn}
       rosters={rosters}
