@@ -116,8 +116,11 @@ export const draftPicks = pgTable(
     idempotencyKey: text("idempotency_key"),
   },
   (t) => [
-    // A pick number can only be consumed once per draft.
-    uniqueIndex("draft_picks_draft_pick_uq").on(t.draftId, t.pickNumber),
+    // A pick number can only hold ONE active pick per draft: undo is a soft
+    // reversal that frees the number for a replacement pick.
+    uniqueIndex("draft_picks_draft_pick_uq")
+      .on(t.draftId, t.pickNumber)
+      .where(sql`${t.undoneAt} IS NULL`),
     // A player can only hold ONE active pick per draft.
     uniqueIndex("draft_picks_active_player_uq")
       .on(t.draftId, t.playerId)

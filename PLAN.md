@@ -46,11 +46,11 @@ Basketball league registration + 4-team snake draft MVP. One league, three roles
 
 ## Phase 5 — Draft engine
 
-- [ ] Pure snake-order module + tests (picks 1–8, later rounds, 4 teams)
-- [ ] Transactional pick service (row lock, server-derived turn, eligibility, uniqueness, audit, idempotency key)
-- [ ] Pause / resume / undo (soft reversal + audit) / complete policies
-- [ ] Concurrency tests: parallel pick requests → exactly one succeeds
-- [ ] HTTP layer: 409 on stale turn, safe error responses
+- [x] Pure snake-order module + tests (picks 1–8, later rounds, 4 teams)
+- [x] Transactional pick service (row lock, server-derived turn, eligibility, uniqueness, audit, idempotency key)
+- [x] Pause / resume / undo (soft reversal + audit) / complete policies
+- [x] Concurrency tests: parallel pick requests → exactly one succeeds
+- [x] HTTP layer: 409 on stale turn, safe error responses
 
 ## Phase 6 — Draft interface & roster management
 
