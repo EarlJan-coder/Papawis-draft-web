@@ -49,8 +49,12 @@ export const auth = betterAuth({
     window: 60,
     max: 60,
     customRules: {
-      "/sign-in": { window: 60, max: 15 },
-      "/sign-up": { window: 60, max: 15 },
+      // Wildcard keys are required: better-auth matches custom rules exactly
+      // unless the pattern contains "*", and its built-in default for
+      // "/sign-up/*" and "/sign-in/*" is a very tight 3 requests / 10 s.
+      // "**" (not "*") because a single "*" does not cross "/" separators.
+      "/sign-in/**": { window: 60, max: 15 },
+      "/sign-up/**": { window: 60, max: 15 },
     },
   },
   advanced: {

@@ -419,9 +419,12 @@ function History({ entries }: { entries: HistoryEntry[] }) {
         <p className="mt-2 text-sm text-muted-foreground">No picks yet.</p>
       ) : (
         <ol className="mt-2 space-y-1" data-testid="pick-history">
-          {[...entries].reverse().map((entry) => (
+          {[...entries].reverse().map((entry, index) => (
             <li
-              key={entry.pickNumber}
+              // Undo + re-pick share a pickNumber, so key off the position
+              // in the append-only source array (stable across appends —
+              // the reversed index would shift on every new pick).
+              key={entries.length - 1 - index}
               className={
                 entry.undoneAt
                   ? "text-sm text-muted-foreground line-through"

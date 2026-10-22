@@ -82,6 +82,7 @@ export type StartedDraft = {
 export async function makeStartedDraft(
   prefix: string,
   rounds = 8,
+  customCaptains?: (Actor & { profileId: string })[],
 ): Promise<StartedDraft> {
   const organizer = await makeUser(`${prefix}-org`);
   const teamIds: string[] = [];
@@ -96,7 +97,11 @@ export async function makeStartedDraft(
 
   const captains: (Actor & { profileId: string })[] = [];
   for (let i = 0; i < 4; i++) {
-    const captain = await makeEligiblePlayer(`${prefix}-c${i + 1}`);
+    // Custom captains (e.g. HTTP tests that hold those users' session
+    // cookies) are used as-is; they must already be approved + eligible.
+    const captain =
+      customCaptains?.[i] ??
+      ({ ...(await makeEligiblePlayer(`${prefix}-c${i + 1}`)), role: "captain" });
     const r = await assignCaptain(
       organizer,
       created.draft.id,
