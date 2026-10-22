@@ -93,6 +93,21 @@ Safety notes:
 
 ## Post-deploy smoke checklist
 
+Because the E2E suite runs against `next dev` (dev CSP, no HSTS), verify
+the **production** configuration at least once per release, locally first:
+
+```bash
+npm run build
+npx next start --port 3200
+# Load http://localhost:3200 in a browser with devtools open:
+#   - Network: HTML response carries Content-Security-Policy,
+#     X-Content-Type-Options, X-Frame-Options, Referrer-Policy,
+#     Permissions-Policy, Strict-Transport-Security
+#   - Console: no SecurityPolicyViolation events / blocked resources
+```
+
+Then against the deployed URL:
+
 - [ ] `https://<your-domain>/` renders the homepage (200) and shows the
       "Final rosters" pending state.
 - [ ] Response headers include `Content-Security-Policy`,

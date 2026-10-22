@@ -9,7 +9,16 @@ import { rateLimits } from "@/db/schema";
  * Each key is namespaced with its window number, so one atomic upsert both
  * counts and rolls the window over — no read-then-write race. Rows use the
  * same table Better Auth's database limiter prunes, so stale windows are
- * cleaned up by the same maintenance path (key prefixes never overlap).
+ * cleaned up by the same maintenance path (key prefixes never overlap —
+ * Better Auth keys are `ip|path`).
+ *
+ * Invariant: keep `rule.windowMs` at or below Better Auth's largest
+ * configured rate-limit window (currently 60 s). Its pruner cuts rows at
+ * `now - largestWindow`, so a window *longer* than that could have live
+ * rows deleted mid-window (silently resetting a budget). Also note pruning
+ * only runs during Better Auth rate-limit consumption (auth traffic), so
+ * orphaned rows linger until the next sign-in — harmless, they are tiny
+ * and bounded per subject/window.
  */
 
 export type RateLimitRule = {

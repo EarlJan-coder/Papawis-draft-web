@@ -59,6 +59,19 @@ describe("enforceRateLimit", () => {
     // A different subject is unaffected by the exhausted one.
     expect((await enforceRateLimit("test:two", rule)).ok).toBe(true);
   });
+
+  it("counts a parallel burst atomically — exactly max get through", async () => {
+    // The upsert must serialize concurrent increments: no lost updates
+    // (over-admission) and no false rejections inside the budget.
+    const rule = { windowMs: 10_000, max: 15 };
+    const decisions = await Promise.all(
+      Array.from({ length: rule.max + 5 }, () =>
+        enforceRateLimit("test:burst", rule),
+      ),
+    );
+    const allowed = decisions.filter((d) => d.ok).length;
+    expect(allowed).toBe(rule.max);
+  });
 });
 
 describe("picks POST rate limit", () => {
