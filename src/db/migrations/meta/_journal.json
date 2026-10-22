@@ -29,6 +29,13 @@
       "when": 1792569799792,
       "tag": "0003_whole_black_tarantula",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792642241257,
+      "tag": "0004_fuzzy_cardiac",
+      "breakpoints": true
     }
   ]
 }

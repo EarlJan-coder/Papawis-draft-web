@@ -1,0 +1,2 @@
+DROP INDEX "draft_picks_draft_pick_uq";--> statement-breakpoint
+CREATE UNIQUE INDEX "draft_picks_draft_pick_uq" ON "draft_picks" USING btree ("draft_id","pick_number") WHERE "draft_picks"."undone_at" IS NULL;
