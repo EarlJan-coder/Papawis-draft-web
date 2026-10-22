@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { renderToStaticMarkup } from "react-dom/server";
+import { renderToReadableStream } from "react-dom/server";
 import HomePage from "@/app/(public)/page";
 import { getLeagueName } from "@/lib/config";
 import { publishDraft } from "@/features/publications/publication-service";
@@ -14,7 +14,15 @@ import { fillAllPicks, makeStartedDraft } from "../setup/draft-fixtures";
  */
 
 async function renderHome(): Promise<string> {
-  return renderToStaticMarkup(await HomePage());
+  // The rosters section streams behind a <Suspense> boundary (Phase 8:
+  // uncached data must not block prerendering), so wait for the async child
+  // to settle — `allReady` — before collecting the full HTML.
+  const stream = await renderToReadableStream(await HomePage());
+  await stream.allReady;
+  const html = await new Response(stream).text();
+  // The streaming renderer emits `<!-- -->` text-node separators that the
+  // static renderer did not; strip them so text assertions stay readable.
+  return html.replace(/<!--.*?-->/g, "");
 }
 
 describe("public homepage", () => {

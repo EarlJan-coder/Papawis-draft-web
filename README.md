@@ -36,6 +36,7 @@ npm run dev                 # http://localhost:3000
 | `npm run typecheck` | Strict TypeScript check |
 | `npm run lint` | ESLint |
 | `npm test` | Vitest (unit + integration) |
+| `npm run e2e` | Playwright end-to-end (full 12-step workflow) |
 | `npm run db:generate` | Generate migration from schema changes |
 | `npm run db:migrate` | Apply pending migrations |
 | `npm run db:studio` | Drizzle Studio (browse data) |
@@ -47,6 +48,11 @@ See `.env.example`. Required:
 - `DATABASE_URL` — PostgreSQL connection string
 - `BETTER_AUTH_SECRET` — `npx @better-auth/cli secret`
 - `BETTER_AUTH_URL` — public URL of the app
+
+## Production deployment
+
+See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for env vars, Neon setup,
+Vercel deploy, the migration procedure, and the post-deploy checklist.
 
 ## Project structure
 

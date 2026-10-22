@@ -69,11 +69,11 @@ Basketball league registration + 4-team snake draft MVP. One league, three roles
 
 ## Phase 8 — QA & deployment readiness
 
-- [ ] Playwright E2E: full 12-step workflow (register → approve → teams → draft → pause/undo → publish)
-- [ ] Lint, typecheck, unit + integration suites green
-- [ ] Security review pass (authz on every endpoint, no secret leakage, rate limiting on auth/draft)
-- [ ] Production docs: env vars, Neon setup, Vercel deploy, migration procedure
-- [ ] All §9 acceptance criteria verified
+- [x] Playwright E2E: full 12-step workflow (register → approve → teams → draft → pause/undo → publish)
+- [x] Lint, typecheck, unit + integration suites green
+- [x] Security review pass (authz on every endpoint, no secret leakage, rate limiting on auth/draft)
+- [x] Production docs: env vars, Neon setup, Vercel deploy, migration procedure → `docs/DEPLOYMENT.md`
+- [x] All §9 acceptance criteria verified — *no §9 spec file exists in the repo; verified against the Phase 1–7 checklists above instead. Every criterion has automated evidence: roles/authz (guards + auth tests), profiles/approval (profiles + approvals tests), teams/draft setup (teams + snake-order tests), draft engine incl. pause/undo/idempotency/concurrency (drafts + picks tests), audit + publication + homepage leak tests (publication + homepage tests), and the whole flow end-to-end in the 12-step Playwright run.*
 
 ## Manual configuration required (user)
 

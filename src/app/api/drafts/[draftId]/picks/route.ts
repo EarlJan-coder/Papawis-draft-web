@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireApiUser } from "@/lib/auth/guards";
+import { enforceRateLimit, PICK_RATE_LIMIT } from "@/lib/rate-limit";
 import { listPicks, makePick, type PickErrorCode } from "@/features/drafts/pick-service";
 
 /**
@@ -38,6 +39,21 @@ export async function POST(request: Request, context: RouteContext) {
     return NextResponse.json(
       { error: auth.status === 401 ? "unauthenticated" : "forbidden", message: auth.message },
       { status: auth.status },
+    );
+  }
+
+  // Per-captain mutation budget — refused before any draft-state work.
+  const rate = await enforceRateLimit(
+    `draft-picks:POST:${auth.user.id}`,
+    PICK_RATE_LIMIT,
+  );
+  if (!rate.ok) {
+    return NextResponse.json(
+      {
+        error: "rate-limited",
+        message: "Too many requests. Please try again later.",
+      },
+      { status: 429, headers: { "Retry-After": String(rate.retryAfterSec) } },
     );
   }
 
