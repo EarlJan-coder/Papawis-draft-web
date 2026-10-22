@@ -4,23 +4,50 @@ import {
   listPendingProfiles,
 } from "@/features/approvals/approval-service";
 import {
+  getCurrentDraft,
+  getDraftReadiness,
+  listCaptainCandidates,
+  listDraftAssignments,
+} from "@/features/drafts/draft-service";
+import { listTeams } from "@/features/teams/team-service";
+import {
   ApprovedPlayerRow,
   PendingProfileCard,
 } from "@/components/organizer/queue";
+import { TeamsPanel, type TeamEntry } from "@/components/organizer/teams-panel";
+import { DraftPanel } from "@/components/organizer/draft-panel";
 import { Badge } from "@/components/ui/badge";
 import { Suspense } from "react";
 
 /**
  * Organizer console: pending-profile review queue with approve/reject and
- * the approved roster with draft-eligibility toggles. Access is restricted
- * to the organizer role and re-verified on every request.
+ * the approved roster with draft-eligibility toggles, plus team/draft
+ * setup (Phase 4). Access is restricted to the organizer role and
+ * re-verified on every request.
  */
 async function OrganizerContent() {
   const user = await requireRole(["organizer"]);
-  const [pending, approved] = await Promise.all([
+  const [pending, approved, leagueTeams, draft, candidates] = await Promise.all([
     listPendingProfiles(),
     listApprovedProfiles(),
+    listTeams(),
+    getCurrentDraft(),
+    listCaptainCandidates(),
   ]);
+
+  const assignments = draft ? await listDraftAssignments(draft.id) : [];
+  const readiness = draft ? await getDraftReadiness(draft.id) : null;
+
+  const entries: TeamEntry[] = leagueTeams.map((team) => {
+    const assignment = assignments.find((a) => a.teamId === team.id);
+    return {
+      teamId: team.id,
+      teamName: team.name,
+      captainUserId: assignment?.captainUserId ?? null,
+      captainName: assignment?.captainName ?? null,
+      draftOrder: assignment?.draftOrder ?? null,
+    };
+  });
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
@@ -75,25 +102,14 @@ async function OrganizerContent() {
         </div>
       </section>
 
-      <section className="mt-10 grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="font-medium">Teams &amp; captains</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Configure the four teams, assign captains, and set draft order.
-          </p>
-          <div className="mt-3">
-            <Badge tone="warning">Coming in phase 4</Badge>
-          </div>
-        </div>
-        <div className="rounded-lg border border-border bg-card p-4">
-          <h3 className="font-medium">Draft controls</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Start, pause, resume, undo, and publish the draft.
-          </p>
-          <div className="mt-3">
-            <Badge tone="warning">Coming in phase 5</Badge>
-          </div>
-        </div>
+      <section className="mt-10 grid items-start gap-4 lg:grid-cols-2">
+        <TeamsPanel
+          entries={entries}
+          candidates={candidates}
+          draftId={draft?.id ?? null}
+          draftStatus={draft?.status ?? "none"}
+        />
+        <DraftPanel draft={draft} readiness={readiness} />
       </section>
     </div>
   );

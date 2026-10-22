@@ -39,10 +39,10 @@ Basketball league registration + 4-team snake draft MVP. One league, three roles
 
 ## Phase 4 — Teams & draft setup
 
-- [ ] Team CRUD (exactly 4), captain assignment (unique per draft), draft order
-- [ ] Draft creation + lifecycle transitions (setup → active → paused → completed) with validation
-- [ ] Start-readiness validation (4 teams, captains, order)
-- [ ] Tests: state transitions, assignment rules, start validation
+- [x] Team CRUD (exactly 4), captain assignment (unique per draft), draft order
+- [x] Draft creation + lifecycle transitions (setup → active → paused → completed) with validation
+- [x] Start-readiness validation (4 teams, captains, order)
+- [x] Tests: state transitions, assignment rules, start validation
 
 ## Phase 5 — Draft engine
 
