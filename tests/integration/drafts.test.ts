@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/db";
-import { auditLogs, drafts, teams, users } from "@/db/schema";
+import { auditLogs, drafts, users } from "@/db/schema";
 import type { Actor } from "@/features/approvals/approval-service";
 import { approveProfile, setDraftEligibility } from "@/features/approvals/approval-service";
 import { submitProfile } from "@/features/profiles/profile-service";

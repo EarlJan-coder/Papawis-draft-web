@@ -1,4 +1,4 @@
-import { and, asc, eq, ne } from "drizzle-orm";
+import { and, asc, eq, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   auditLogs,
@@ -9,6 +9,7 @@ import {
   users,
 } from "@/db/schema";
 import type { Actor } from "@/features/approvals/approval-service";
+import { maskEmail } from "@/lib/utils";
 
 /**
  * Draft lifecycle and captain assignment (Phase 4).
@@ -301,8 +302,7 @@ export async function removeAssignment(
 }
 
 /** Pre-start checklist for the organizer UI. */
-export async function getDraftReadiness(draftId: string): Promise<DraftReadiness> {
-  const draft = await requireDraft(draftId);
+export async function getDraftReadiness(draftId: string): Promise<DraftReadiness> {  const draft = await requireDraft(draftId);
   if (!draft) return { ready: false, missing: ["draft-not-found"] };
 
   const missing: string[] = [];
@@ -326,6 +326,76 @@ export async function getDraftReadiness(draftId: string): Promise<DraftReadiness
   }
 
   return { ready: missing.length === 0, missing };
+}
+
+export type DraftAssignmentSummary = {
+  teamId: string;
+  teamName: string;
+  captainUserId: string | null;
+  captainName: string | null;
+  draftOrder: number | null;
+};
+
+/** Assignments for a draft, in draft order, with captain display names. */
+export async function listDraftAssignments(
+  draftId: string,
+): Promise<DraftAssignmentSummary[]> {
+  const rows = await db
+    .select({
+      teamId: draftTeamAssignments.teamId,
+      teamName: teams.name,
+      captainUserId: draftTeamAssignments.captainUserId,
+      captainName: users.name,
+      draftOrder: draftTeamAssignments.draftOrder,
+    })
+    .from(draftTeamAssignments)
+    .innerJoin(teams, eq(draftTeamAssignments.teamId, teams.id))
+    .leftJoin(users, eq(draftTeamAssignments.captainUserId, users.id))
+    .where(eq(draftTeamAssignments.draftId, draftId))
+    .orderBy(asc(draftTeamAssignments.draftOrder));
+
+  return rows.map((r) => ({
+    teamId: r.teamId,
+    teamName: r.teamName,
+    captainUserId: r.captainUserId,
+    captainName: r.captainName,
+    draftOrder: r.draftOrder,
+  }));
+}
+
+export type CaptainCandidate = {
+  userId: string;
+  displayName: string;
+  emailMasked: string;
+  role: string;
+};
+
+/** Users the organizer may assign as captains: active, approved profile. */
+export async function listCaptainCandidates(): Promise<CaptainCandidate[]> {
+  const rows = await db
+    .select({
+      userId: users.id,
+      role: users.role,
+      email: users.email,
+      displayName: playerProfiles.displayName,
+    })
+    .from(playerProfiles)
+    .innerJoin(users, eq(playerProfiles.userId, users.id))
+    .where(
+      and(
+        eq(playerProfiles.profileStatus, "approved"),
+        eq(users.status, "active"),
+        sql`${users.role} <> 'organizer'`,
+      ),
+    )
+    .orderBy(asc(playerProfiles.displayName));
+
+  return rows.map((r) => ({
+    userId: r.userId,
+    displayName: r.displayName,
+    emailMasked: maskEmail(r.email),
+    role: r.role,
+  }));
 }
 
 // ---------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { db } from "@/db";
 import { auditLogs, teams, users } from "@/db/schema";
@@ -33,11 +33,6 @@ async function makeUser(
     .limit(1);
   if (!row) throw new Error("test user missing");
   return { id: row.id, role: row.role };
-}
-
-async function teamNames(): Promise<string[]> {
-  const rows = await db.select().from(teams).orderBy(asc(teams.name));
-  return rows.map((t) => t.name);
 }
 
 describe("team service", () => {

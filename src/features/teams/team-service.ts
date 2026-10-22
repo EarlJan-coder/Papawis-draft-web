@@ -42,11 +42,12 @@ export async function createTeam(
   if (actor.role !== "organizer") return forbidden();
 
   const name = normalizeName(rawName);
-  if (!name) {
+  if (!name || name.length > MAX_NAME_LENGTH) {
     return {
       ok: false,
       error: "invalid-name",
-      message: "Team name cannot be empty.",
+      message:
+        "Team name cannot be empty and must be at most 40 characters.",
     };
   }
 
