@@ -1,4 +1,4 @@
-import { and, asc, eq, ne, sql } from "drizzle-orm";
+import { and, asc, desc, eq, ne, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   auditLogs,
@@ -96,6 +96,18 @@ export async function getCurrentDraft(): Promise<
     .from(drafts)
     .where(ne(drafts.status, "completed"))
     .orderBy(asc(drafts.createdAt))
+    .limit(1);
+  return draft ?? null;
+}
+
+/** The most recent draft of any status (completed drafts still render). */
+export async function getLatestDraft(): Promise<
+  typeof drafts.$inferSelect | null
+> {
+  const [draft] = await db
+    .select()
+    .from(drafts)
+    .orderBy(desc(drafts.createdAt))
     .limit(1);
   return draft ?? null;
 }

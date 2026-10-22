@@ -14,6 +14,7 @@ import {
   setDraftRounds,
   startDraft,
 } from "./draft-service";
+import { undoPick } from "./pick-service";
 
 /**
  * Draft setup + lifecycle actions (Phase 4). Thin transport over the draft
@@ -45,6 +46,23 @@ function refreshed(state: DraftActionState): DraftActionState {
   revalidatePath("/organizer");
   revalidatePath("/draft");
   return state;
+}
+
+export async function undoPickAction(
+  _previous: DraftActionState,
+  formData: FormData,
+): Promise<DraftActionState> {
+  const gate = await requireOrganizer();
+  if (!("actor" in gate)) return gate.state;
+
+  const draftId = String(formData.get("draftId") ?? "");
+  const reason = String(formData.get("reason") ?? "");
+  const result = await undoPick(gate.actor, draftId, reason);
+  return refreshed(
+    result.ok
+      ? { status: "success", message: "Pick undone." }
+      : { status: "error", message: result.message },
+  );
 }
 
 export async function createDraftAction(

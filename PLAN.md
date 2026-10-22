@@ -54,11 +54,11 @@ Basketball league registration + 4-team snake draft MVP. One league, three roles
 
 ## Phase 6 — Draft interface & roster management
 
-- [ ] Draft board: available players (search, position filter), photo placeholder, height/positions/skills
-- [ ] Current turn banner, pick confirmation dialog, error/conflict feedback
-- [ ] Team roster summaries + position coverage (advisory warnings)
-- [ ] Draft history view
-- [ ] Captain + organizer dashboards wired to live draft state
+- [x] Draft board: available players (search, position filter), photo placeholder, height/positions/skills
+- [x] Current turn banner, pick confirmation dialog, error/conflict feedback
+- [x] Team roster summaries + position coverage (advisory warnings)
+- [x] Draft history view
+- [x] Captain + organizer dashboards wired to live draft state
 
 ## Phase 7 — Audit history & publication
 

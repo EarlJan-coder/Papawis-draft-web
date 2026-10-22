@@ -29,6 +29,14 @@ async function NavLinks() {
           >
             Dashboard
           </Link>
+          {(user.role === "captain" || user.role === "organizer") && (
+            <Link
+              href="/draft"
+              className="rounded-md px-3 py-2 text-sm font-medium text-brand-100 hover:text-white hover:bg-brand-700 transition-colors"
+            >
+              Draft
+            </Link>
+          )}
           {user.role === "organizer" && (
             <Link
               href="/organizer"
