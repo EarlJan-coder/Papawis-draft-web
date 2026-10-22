@@ -1,8 +1,11 @@
 import { requireUser } from "@/lib/auth/guards";
 import { getProfileForUser } from "@/features/profiles/profile-service";
+import { getCurrentDraft, getLatestDraft, listDraftAssignments } from "@/features/drafts/draft-service";
+import { getDraftTurn } from "@/features/drafts/pick-service";
 import { ProfileForm } from "@/components/profile-form";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 import { Suspense } from "react";
 
 /**
@@ -111,7 +114,65 @@ async function DashboardContent() {
           />
         </div>
       </Card>
+
+      {(user.role === "captain" || user.role === "organizer") && (
+        <DraftStatusCard userId={user.id} role={user.role} />
+      )}
     </div>
+  );
+}
+
+const DRAFT_STATUS_LABEL = {
+  setup: { tone: "warning", label: "Setup" },
+  active: { tone: "success", label: "Live" },
+  paused: { tone: "warning", label: "Paused" },
+  completed: { tone: "neutral", label: "Completed" },
+} as const;
+
+/** Captain/organizer shortcut into the draft room with live status. */
+async function DraftStatusCard({
+  userId,
+  role,
+}: {
+  userId: string;
+  role: "captain" | "organizer";
+}) {
+  const [latest, current] = await Promise.all([
+    getLatestDraft(),
+    getCurrentDraft(),
+  ]);
+  if (!latest) return null;
+
+  const assignments = await listDraftAssignments(latest.id);
+  const mine = assignments.find((a) => a.captainUserId === userId);
+  const turn =
+    latest.id === current?.id ? await getDraftTurn(latest.id) : null;
+  const myTurn = turn?.captainUserId === userId;
+  const badge = DRAFT_STATUS_LABEL[latest.status];
+
+  return (
+    <Card className="mt-6">
+      <CardTitle className="text-base">
+        Draft {latest.status === "completed" ? "results" : "room"}
+      </CardTitle>
+      <CardDescription>
+        {role === "organizer"
+          ? "Manage the live draft, rosters, and picks."
+          : mine
+            ? `You captain ${mine.teamName} (pick #${mine.draftOrder}).`
+            : "You are not assigned to a team in this draft."}
+      </CardDescription>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <Badge tone={badge.tone}>{badge.label}</Badge>
+        {myTurn && <Badge tone="brand">Your pick right now</Badge>}
+        <Link
+          href="/draft"
+          className="text-sm font-medium text-brand-700 hover:underline"
+        >
+          Open draft room →
+        </Link>
+      </div>
+    </Card>
   );
 }
 
