@@ -10,12 +10,14 @@ import {
   listDraftAssignments,
 } from "@/features/drafts/draft-service";
 import { listTeams } from "@/features/teams/team-service";
+import { listAuditEntries } from "@/features/publications/publication-service";
 import {
   ApprovedPlayerRow,
   PendingProfileCard,
 } from "@/components/organizer/queue";
 import { TeamsPanel, type TeamEntry } from "@/components/organizer/teams-panel";
 import { DraftPanel } from "@/components/organizer/draft-panel";
+import { AuditPanel } from "@/components/organizer/audit-panel";
 import { Badge } from "@/components/ui/badge";
 import { Suspense } from "react";
 
@@ -27,13 +29,19 @@ import { Suspense } from "react";
  */
 async function OrganizerContent() {
   const user = await requireRole(["organizer"]);
-  const [pending, approved, leagueTeams, draft, candidates] = await Promise.all([
-    listPendingProfiles(),
-    listApprovedProfiles(),
-    listTeams(),
-    getCurrentDraft(),
-    listCaptainCandidates(),
-  ]);
+  const [pending, approved, leagueTeams, draft, candidates, audit] =
+    await Promise.all([
+      listPendingProfiles(),
+      listApprovedProfiles(),
+      listTeams(),
+      getCurrentDraft(),
+      listCaptainCandidates(),
+      listAuditEntries(
+        // requireRole(["organizer"]) already enforced the role above.
+        { id: user.id, role: user.role ?? "organizer" },
+        50,
+      ),
+    ]);
 
   const assignments = draft ? await listDraftAssignments(draft.id) : [];
   const readiness = draft ? await getDraftReadiness(draft.id) : null;
@@ -111,6 +119,8 @@ async function OrganizerContent() {
         />
         <DraftPanel draft={draft} readiness={readiness} />
       </section>
+
+      <AuditPanel entries={audit.ok ? audit.entries : []} />
     </div>
   );
 }

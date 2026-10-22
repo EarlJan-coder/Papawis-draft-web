@@ -1,13 +1,17 @@
 import Link from "next/link";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
+import { getPublishedRosters } from "@/features/publications/publication-service";
 import { getLeagueName } from "@/lib/config";
 
 /**
  * Public landing page. Shows only public league information — no private
- * player data, no live draft state.
+ * player data, no live draft state. Rosters appear only after the organizer
+ * publishes the draft (Phase 7), served through the whitelisted publication
+ * payload (names/positions only — never ids or contact details).
  */
-export default function HomePage() {
+export default async function HomePage() {
   const leagueName = getLeagueName();
+  const rosters = await getPublishedRosters();
 
   const steps = [
     {
@@ -70,6 +74,51 @@ export default function HomePage() {
             </Card>
           ))}
         </div>
+      </section>
+
+      <section
+        className="mt-12"
+        aria-labelledby="published-rosters"
+        data-testid={rosters ? "published-rosters" : "rosters-pending"}
+      >
+        <h2 id="published-rosters" className="text-2xl font-semibold">
+          Final rosters
+        </h2>
+        {rosters ? (
+          <>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Published{" "}
+              {rosters.publishedAt.toISOString().slice(0, 10)} ·{" "}
+              {rosters.totalPicks} picks across {rosters.teams.length} teams.
+            </p>
+            <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {rosters.teams.map((team) => (
+                <Card key={team.teamName}>
+                  <CardTitle className="text-base text-brand-700">
+                    {team.teamName}
+                  </CardTitle>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Captain: {team.captainName ?? "—"}
+                  </p>
+                  <ul className="mt-3 space-y-1">
+                    {team.players.map((player) => (
+                      <li key={player.displayName} className="text-sm">
+                        {player.displayName}{" "}
+                        <span className="text-xs text-muted-foreground">
+                          {player.positions.join("/")}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </Card>
+              ))}
+            </div>
+          </>
+        ) : (
+          <p className="mt-2 text-sm text-muted-foreground">
+            Rosters will appear here once the organizer publishes the draft.
+          </p>
+        )}
       </section>
 
       <section className="mt-12 rounded-lg border border-border bg-white p-6">

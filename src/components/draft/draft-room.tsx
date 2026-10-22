@@ -11,6 +11,10 @@ import {
   type DraftActionState,
 } from "@/features/drafts/actions";
 import {
+  publishDraftAction,
+  type PublishActionState,
+} from "@/features/publications/actions";
+import {
   positionCoverageWarnings,
 } from "@/features/drafts/coverage";
 import type { AvailablePlayer, RosterSummary } from "@/features/drafts/board-service";
@@ -31,6 +35,7 @@ type DraftSummary = {
   status: "setup" | "active" | "paused" | "completed";
   totalRounds: number;
   currentPickNumber: number;
+  publishedAt: string | null;
 };
 
 type HistoryEntry = {
@@ -449,6 +454,10 @@ function OrganizerControls({
     undoPickAction,
     IDLE,
   );
+  const [publishState, publishFormAction, publishPending] = useActionState(
+    publishDraftAction,
+    IDLE as PublishActionState,
+  );
   const [pauseReason, setPauseReason] = useState("");
 
   return (
@@ -516,6 +525,33 @@ function OrganizerControls({
             </Button>
           </form>
         )}
+        {draft.status === "completed" &&
+          (draft.publishedAt ? (
+            <p
+              className="text-sm text-green-700"
+              data-testid="published-indicator"
+            >
+              Rosters published — live on the homepage.
+            </p>
+          ) : (
+            <form
+              action={publishFormAction}
+              onSubmit={(event) => {
+                if (
+                  !window.confirm(
+                    "Publish rosters? This makes them public and cannot be undone.",
+                  )
+                ) {
+                  event.preventDefault();
+                }
+              }}
+            >
+              <input type="hidden" name="draftId" value={draft.id} />
+              <Button type="submit" size="sm" disabled={publishPending}>
+                {publishPending ? "Publishing…" : "Publish rosters"}
+              </Button>
+            </form>
+          ))}
       </div>
       {undoState.status !== "idle" && undoState.message && (
         <p
@@ -527,6 +563,19 @@ function OrganizerControls({
           role={undoState.status === "error" ? "alert" : "status"}
         >
           {undoState.message}
+        </p>
+      )}
+      {publishState.status !== "idle" && publishState.message && (
+        <p
+          className={
+            publishState.status === "error"
+              ? "mt-2 text-sm text-destructive"
+              : "mt-2 text-sm text-green-700"
+          }
+          role={publishState.status === "error" ? "alert" : "status"}
+          data-testid="publish-message"
+        >
+          {publishState.message}
         </p>
       )}
     </div>

@@ -242,6 +242,14 @@ export async function makePick(
         .update(drafts)
         .set({ status: "completed", completedAt: new Date() })
         .where(eq(drafts.id, draftId));
+      // Auto-completion is still a completion: record who finished it.
+      await tx.insert(auditLogs).values({
+        actorUserId: actor.id,
+        action: "draft.completed",
+        entityType: "draft",
+        entityId: draftId,
+        metadata: { auto: true, finalPickNumber: pick!.pickNumber },
+      });
     } else {
       await tx
         .update(drafts)
